@@ -10,6 +10,7 @@ import Foundation
 
 public class CustomHTTPProtocol: URLProtocol {
     static var blacklistedHosts = [String]()
+    static var whitelistedHosts = [String]()
 
     struct Constants {
         static let RequestHandledKey = "URLProtocolRequestHandled"
@@ -80,7 +81,16 @@ public class CustomHTTPProtocol: URLProtocol {
     private class func shouldHandleRequest(_ request: URLRequest) -> Bool {
         guard let host = request.url?.host else { return false }
 
-        return CustomHTTPProtocol.blacklistedHosts.filter({ host.hasSuffix($0) }).isEmpty
+        var shouldHandle = false
+        if whitelistedHosts.count > 0 {
+            shouldHandle = !CustomHTTPProtocol.whitelistedHosts.filter({ host.hasSuffix($0) }).isEmpty
+        } else {
+            shouldHandle = true
+        }
+        if blacklistedHosts.count > 0  {
+            shouldHandle = CustomHTTPProtocol.blacklistedHosts.filter({ host.hasSuffix($0) }).isEmpty
+        }
+        return shouldHandle
     }
     
     deinit {
